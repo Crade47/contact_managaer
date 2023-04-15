@@ -4,7 +4,8 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "dev": "concurrently \"npx tsc --watch\" \"nodemon -q ./dist/server.js\""
+    "dev": "concurrently \"npx tsc --watch\" \"nodemon -q ./dist/server.js\"",
+    "start":"tsc && node ./dist/server.js"
   },
   "keywords": [],
   "author": "",
