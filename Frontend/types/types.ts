@@ -16,3 +16,13 @@ export interface UserContextValue {
     errorState: string | null,
     isLoading: boolean,
   };
+
+export interface Contact{
+
+  createdAt:Date,
+  email:string,
+  name: string,
+  phone: string
+  updatedAt:Date,
+  user_id:string,
+}

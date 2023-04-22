@@ -9,7 +9,7 @@ import {
 import App from './App'
 import './index.css'
 import AppProvider from './hooks'
-
+import 'react-tooltip/dist/react-tooltip.css'
 
 
 const queryClient = new QueryClient();

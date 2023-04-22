@@ -3,15 +3,18 @@ import type { ReactNode } from 'react';
 import { useCookies } from 'react-cookie';
 import { UserContextValue, UserData } from '../../../types/types';
 import api from '../../services/api';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import type { AxiosError } from 'axios';
+
+
 
 const UserContext = createContext<UserContextValue>({} as UserContextValue);
 
 export const UserProvider = ({children}:{children:ReactNode}) =>{
+
     const [ cookies, setCookies, removeCookies ] = useCookies();
     const [errorState, setErrorState] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
-    
     const navigate = useNavigate();
     const Login = async (data:UserData) => {
         try {
@@ -22,10 +25,10 @@ export const UserProvider = ({children}:{children:ReactNode}) =>{
             setCookies('token', res.data.token);
             navigate("/contacts")
 
-        } catch (error) {
-
+        } catch (error: Error | AxiosError) {
+            
             setErrorState(error?.response.data.message);
-            throw new Error(`${error}`);
+            
         } finally{
             setIsLoading(false)
         }
