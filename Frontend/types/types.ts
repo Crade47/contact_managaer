@@ -1,4 +1,4 @@
-import { ChangeEvent } from "react";
+import { ChangeEvent, Dispatch, SetStateAction } from "react";
 
 export interface UserData{
     username?:string,
@@ -25,4 +25,13 @@ export interface Contact{
   phone: string
   updatedAt:Date,
   user_id:string,
+  _id: string
+}
+
+export interface ContactWindowProps{
+  isOpen: boolean,
+  data: Contact,
+  setIsOpen: Dispatch<SetStateAction<boolean>>,
+  isEditDisabled: boolean,
+  setIsEditDisabled:Dispatch<SetStateAction<boolean>>
 }

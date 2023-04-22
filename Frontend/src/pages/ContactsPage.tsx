@@ -3,17 +3,25 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowRightFromBracket,
   faPhone,
-  faCircleInfo,
   faPenToSquare,
 } from "@fortawesome/free-solid-svg-icons";
 import api from "../services/api";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Contact } from "../../types/types";
-import { Tooltip } from 'react-tooltip'
+import { Tooltip } from "react-tooltip";
+import { ContactWindow } from "../components/ContactWindow";
+import { useState } from "react";
 
 export const ContactsPage = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isEditDisabled, setIsEditDisabled] = useState(false)
+  const [selectedContact, setSelectedContact] = useState<Contact|null>(null)
   const { cookies, Logout } = useAuth();
-  const queryClient = useQueryClient();
+
+  const windowOpen = (contact: Contact) => {
+    setSelectedContact(contact)
+    setIsOpen((prevState) => !prevState)
+  };
 
   const fetchAllContacts = async () => {
     const response = await api
@@ -27,6 +35,11 @@ export const ContactsPage = () => {
       });
     return response;
   };
+
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ["contacts"],
+    queryFn: fetchAllContacts,
+  });
 
   const Header = () => {
     return (
@@ -42,11 +55,7 @@ export const ContactsPage = () => {
     );
   };
 
-  const ContactList = () => {
-    const { data, isLoading, isError, error } = useQuery({
-      queryKey: ["contacts"],
-      queryFn: fetchAllContacts,
-    });
+  const ContactList = ({ data }: { data: Contact[] }) => {
     if (isLoading) {
       return <div className="loader"></div>;
     }
@@ -57,16 +66,22 @@ export const ContactsPage = () => {
           <div className="text-center font-inter text-white">
             An error has occured. Try logging in again
           </div>
-          <div>{error?.message}</div>
+          <div className="mt-3 text-center font-inter text-white">
+            {(error as any)?.message}
+          </div>
         </div>
       );
     }
     return (
       <>
-        {data?.data.map((contact: Contact) => {
+        {data?.map((contact: Contact) => {
           return (
             <>
-              <div className="flex items-center justify-between border-b border-gray-600 p-6">
+              <div
+                className="flex cursor-pointer items-center justify-between border-b border-gray-600 p-6"
+                onClick={() => windowOpen(contact)}
+                key={contact._id}
+              >
                 <div className="flex">
                   <div className="relative rounded-full bg-slate-500 p-8">
                     <span className="child font-inter">
@@ -76,27 +91,35 @@ export const ContactsPage = () => {
                   <div className="p-4 text-xl text-white">{contact.name}</div>
                 </div>
                 <div>
-                  <button>
+                  <button
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      alert(
+                        "This is just example application. Maybe in the future I will add this feature haha"
+                      );
+                    }}
+                  >
                     <FontAwesomeIcon
                       icon={faPhone}
-                      className="p-5 text-xl text-gray-400 cursor-pointer"
-                      data-tooltip-id="call-tooltip" 
+                      className="cursor-pointer p-5 text-xl text-gray-400"
+                      data-tooltip-id="call-tooltip"
                       data-tooltip-content="Call"
                     />
-                    <Tooltip id="call-tooltip"/>
+                    <Tooltip id="call-tooltip" />
                   </button>
 
-                  <button >
+                  <button>
                     <FontAwesomeIcon
                       icon={faPenToSquare}
-                      className="p-5 text-xl text-gray-400"
-                      data-tooltip-id="edit-tooltip" 
+                      className="p-5 pr-0 text-xl text-gray-400"
+                      data-tooltip-id="edit-tooltip"
                       data-tooltip-content="Edit"
                     />
                     <Tooltip id="edit-tooltip" />
                   </button>
                 </div>
               </div>
+              
             </>
           );
         })}
@@ -106,8 +129,14 @@ export const ContactsPage = () => {
 
   return (
     <>
-      <Header />
-      <ContactList />
+      <div className="mx-auto h-screen max-w-4xl border border-gray-700">
+        <Header />
+        <ContactList data={data?.data} />
+        {
+          (isOpen && selectedContact) &&
+          <ContactWindow isOpen={isOpen} data={selectedContact} setIsOpen={setIsOpen} isEditDisabled={isEditDisabled} setIsEditDisabled={setIsEditDisabled}  />
+        }
+      </div>
     </>
   );
 };
