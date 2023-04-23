@@ -1,8 +1,8 @@
 
-import { ChangeEvent, FormEvent, useContext, useState } from "react";
+import { FormEvent, useState } from "react";
 import { useAuth } from "../hooks/auth";
 import { UserData } from "../../types/types";
-import { Navigate } from "react-router-dom";
+import { LoadingComponent } from "../components/LoadingComponent";
 
 
 export const LoginPage = () => {
@@ -18,21 +18,6 @@ export const LoginPage = () => {
     await Login(formData);
   };
 
-  const LoadingComponent = () => {
-    return (
-      <>
-          <div className="flex pt-9 justify-center ">
-
-            <div className="flex animate-pulse space-x-2">
-              <div className="h-2 w-2 rounded-full bg-gray-500"></div>
-              <div className="h-2 w-2 rounded-full bg-gray-500"></div>
-              <div className="h-2 w-2 rounded-full bg-gray-500"></div>
-            </div>
-          </div>
-        
-      </>
-    );
-  };
 
   return (
     <>
@@ -83,3 +68,4 @@ export const LoginPage = () => {
     </>
   );
 };
+

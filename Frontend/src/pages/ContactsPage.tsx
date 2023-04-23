@@ -6,22 +6,67 @@ import {
   faPenToSquare,
 } from "@fortawesome/free-solid-svg-icons";
 import api from "../services/api";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Contact } from "../../types/types";
 import { Tooltip } from "react-tooltip";
 import { ContactWindow } from "../components/ContactWindow";
-import { useState } from "react";
+import { ChangeEvent, Dispatch, MouseEvent, SetStateAction, useState } from "react";
+import { LoadingComponent } from "../components/LoadingComponent";
 
 export const ContactsPage = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isEditDisabled, setIsEditDisabled] = useState(false)
-  const [selectedContact, setSelectedContact] = useState<Contact|null>(null)
+  const [isEditDisabled, setIsEditDisabled] = useState(true);
+  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const { cookies, Logout } = useAuth();
-
-  const windowOpen = (contact: Contact) => {
-    setSelectedContact(contact)
-    setIsOpen((prevState) => !prevState)
+  const queryClient = useQueryClient();
+ 
+  const updateContact = async (contactData:Contact) => {
+    const url = `/api/contacts/${contactData._id}`
+    const body = {
+      name: contactData.name,
+      email: contactData.email,
+      phone: contactData.phone
+    }
+    return api.put(url, body, {
+      headers: {
+        Authorization: `Bearer ${cookies.token}`,
+      },
+    });
   };
+
+
+
+  const { mutateAsync, isLoading:isEditLoading, isError:isEditError } = useMutation({
+    mutationFn:updateContact
+  });
+  
+  const windowOpen = (contact: Contact) => {
+    setSelectedContact(contact);
+    setIsOpen((prevState) => !prevState);
+  };
+
+  const handleContactChange = (
+    event: ChangeEvent<HTMLInputElement>,
+    setContactData: Dispatch<SetStateAction<Contact>>
+  ) => {
+    const { name, value }: HTMLInputElement = event.target;
+    setContactData((prevContactData: Contact) => {
+      return {
+        ...prevContactData,
+        [name]: value,
+      };
+    });
+  };
+
+  
+
+  const handleUpdateContact = (event:MouseEvent<HTMLButtonElement, MouseEvent>,contactData:Contact) =>{
+    event.preventDefault();
+    mutateAsync(contactData)
+    .then(()=>{
+      refetch();
+    })
+  }
 
   const fetchAllContacts = async () => {
     const response = await api
@@ -36,7 +81,7 @@ export const ContactsPage = () => {
     return response;
   };
 
-  const { data, isLoading, isError, error } = useQuery({
+  const { data, isLoading, isError, error, refetch, isRefetching } = useQuery({
     queryKey: ["contacts"],
     queryFn: fetchAllContacts,
   });
@@ -76,19 +121,22 @@ export const ContactsPage = () => {
       <>
         {data?.map((contact: Contact) => {
           return (
-            <>
+            <div key={contact._id}>
               <div
                 className="flex cursor-pointer items-center justify-between border-b border-gray-600 p-6"
                 onClick={() => windowOpen(contact)}
-                key={contact._id}
+                
               >
                 <div className="flex">
+                  {/* Profile */}
                   <div className="relative rounded-full bg-slate-500 p-8">
+                    {/* Initial for contact in profile pic */}
                     <span className="child font-inter">
                       {contact.name[0].toUpperCase()}
                     </span>
                   </div>
-                  <div className="p-4 text-xl text-white">{contact.name}</div>
+                  {/* Contact Name */}
+                  {(isEditLoading || isRefetching) ? <div className="ml-5 -mt-[0.45rem]"><LoadingComponent/></div> : <div className="p-4 text-xl text-white">{contact.name}</div>}
                 </div>
                 <div>
                   <button
@@ -119,8 +167,7 @@ export const ContactsPage = () => {
                   </button>
                 </div>
               </div>
-              
-            </>
+            </div >
           );
         })}
       </>
@@ -132,10 +179,17 @@ export const ContactsPage = () => {
       <div className="mx-auto h-screen max-w-4xl border border-gray-700">
         <Header />
         <ContactList data={data?.data} />
-        {
-          (isOpen && selectedContact) &&
-          <ContactWindow isOpen={isOpen} data={selectedContact} setIsOpen={setIsOpen} isEditDisabled={isEditDisabled} setIsEditDisabled={setIsEditDisabled}  />
-        }
+        {isOpen && selectedContact && (
+          <ContactWindow
+            isOpen={isOpen}
+            data={selectedContact}
+            setIsOpen={setIsOpen}
+            isEditDisabled={isEditDisabled}
+            setIsEditDisabled={setIsEditDisabled}
+            handleContactChange={handleContactChange}
+            handleUpdateContact={handleUpdateContact}
+          />
+        )}
       </div>
     </>
   );

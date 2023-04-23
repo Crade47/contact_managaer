@@ -1,4 +1,4 @@
-import { ChangeEvent, Dispatch, SetStateAction } from "react";
+import { ChangeEvent, Dispatch, MouseEvent, SetStateAction } from "react";
 
 export interface UserData{
     username?:string,
@@ -33,5 +33,7 @@ export interface ContactWindowProps{
   data: Contact,
   setIsOpen: Dispatch<SetStateAction<boolean>>,
   isEditDisabled: boolean,
-  setIsEditDisabled:Dispatch<SetStateAction<boolean>>
+  setIsEditDisabled:Dispatch<SetStateAction<boolean>>,
+  handleContactChange: (event: ChangeEvent<HTMLInputElement>, setContactData: Dispatch<SetStateAction<Contact>>) => void,
+  handleUpdateContact: (event: MouseEvent<HTMLButtonElement, MouseEvent>,contactData:Contact) => void
 }
