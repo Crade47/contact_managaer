@@ -14,6 +14,7 @@ import { ContactWindow } from "../components/ContactWindow";
 import {
   ChangeEvent,
   Dispatch,
+  FormEvent,
   MouseEvent,
   SetStateAction,
   useState,
@@ -28,6 +29,7 @@ export const ContactsPage = () => {
   const { cookies, Logout } = useAuth();
   const [isAddWindowOpen, setIsAddWindowOpen] = useState(false);
 
+  //PUT request to modify the contact
   const updateContact = async (contactData: Contact) => {
     const url = `/api/contacts/${contactData._id}`;
     const body = {
@@ -42,15 +44,40 @@ export const ContactsPage = () => {
     });
   };
 
-
-  const addContact = async(contactData: BaseContact) =>{
-
+  //POST request at the backend to create contact
+  const addContactFn = async(contactData: BaseContact) =>{
+    const url = `/api/contacts/`;
+    const body = {
+      name: contactData.name,
+      email: contactData.email,
+      phone: contactData.phone,
+    };
+    return api.post(url,body,{
+      headers: {
+        Authorization: `Bearer ${cookies.token}`
+      }
+    })
   }
 
+  //DEL request to delete contact
+
+  const deleteContactFn = async (contactData: Contact) =>{
+    const url = `/api/contacts/${contactData._id}`
+    return api.delete(url, {
+      headers:{
+        Authorization: `Bearer ${cookies.token}`
+      }
+    })
+  }
+
+  //Mutation hook for adding contact
+  const { mutateAsync: addContact } = useMutation({
+    mutationFn: addContactFn
+  })
 
   // Editing mutation hook
   const {
-    mutateAsync,
+    mutateAsync:editContact,
     isLoading: isEditLoading,
     isError: isEditError,
   } = useMutation({
@@ -61,6 +88,14 @@ export const ContactsPage = () => {
     setSelectedContact(contact);
     setIsOpen((prevState) => !prevState);
   };
+
+  // Delete mutation hook
+
+  const { mutateAsync: deleteContact } = useMutation({
+    mutationFn: deleteContactFn
+  })
+
+//Handler functions for morm
 
   const handleContactChange = (
     event: ChangeEvent<HTMLInputElement>,
@@ -80,12 +115,17 @@ export const ContactsPage = () => {
     contactData: Contact
   ) => {
     event.preventDefault();
-    mutateAsync(contactData).then(() => {
+    editContact(contactData).then(() => {
       refetch();
     });
   };
 
-  const handleAddContact = (event: MouseEvent<HTMLButtonElement, MouseEvent>,contactData: BaseContact)=>{
+  const handleAddContact = (event: FormEvent<HTMLFormElement>,contactData: BaseContact)=>{
+    setIsAddWindowOpen(s => !s)
+    event.preventDefault();
+    addContact(contactData).then(()=>{
+      refetch();
+    })
 
   }
 
@@ -101,6 +141,13 @@ export const ContactsPage = () => {
       });
     return response;
   };
+
+  const handleDeleteContact = (event:MouseEvent<HTMLButtonElement, MouseEvent>, contactData:Contact) =>{
+    event.stopPropagation();
+    setIsOpen(prevState => !prevState);
+    deleteContact(contactData).then(()=>refetch())
+
+  }
 
   const { data, isLoading, isError, error, refetch, isRefetching } = useQuery({
     queryKey: ["contacts"],
@@ -222,6 +269,7 @@ export const ContactsPage = () => {
             setIsEditDisabled={setIsEditDisabled}
             handleContactChange={handleContactChange}
             handleUpdateContact={handleUpdateContact}
+            handleDeleteContact={handleDeleteContact}
           />
         )}
 

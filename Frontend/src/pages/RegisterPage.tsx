@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import { useAuth } from "../hooks/auth";
 import { UserData } from "../../types/types";
+import { Link } from "react-router-dom";
 export const RegisterPage = () => {
   const { handleFormChange } = useAuth();
 
@@ -24,7 +25,7 @@ export const RegisterPage = () => {
 
         <form
           onSubmit={handleSubmit}
-          className="mx-auto flex max-w-xs flex-col justify-center gap-y-4 rounded-lg bg-slate-700 p-9 font-inter shadow-md backdrop-blur-3xl dark:text-white md:max-w-lg"
+          className="mx-auto flex max-w-xs flex-col justify-center gap-y-4 rounded-lg p-9 font-inter shadow-md backdrop-blur-3xl dark:text-white md:max-w-lg"
         >
           <input
             type="email"
@@ -61,6 +62,7 @@ export const RegisterPage = () => {
             Register
           </button>
         </form>
+        <div className="dark:text-white font-inter center text-sm">Already have an account? <Link to="/login" className="text-darkFont font-bold">Login!</Link></div>
       </div>
     </>
   );

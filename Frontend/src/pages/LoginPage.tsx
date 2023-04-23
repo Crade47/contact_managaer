@@ -3,6 +3,7 @@ import { FormEvent, useState } from "react";
 import { useAuth } from "../hooks/auth";
 import { UserData } from "../../types/types";
 import { LoadingComponent } from "../components/LoadingComponent";
+import { Link } from "react-router-dom";
 
 
 export const LoginPage = () => {
@@ -28,7 +29,7 @@ export const LoginPage = () => {
 
         <form
           onSubmit={handleSubmit}
-          className="mx-auto flex max-w-xs flex-col justify-center gap-y-4 rounded-lg bg-slate-700 p-9 font-inter shadow-md backdrop-blur-3xl dark:text-white md:max-w-lg"
+          className="mx-auto flex max-w-xs flex-col justify-center gap-y-4 rounded-lg p-9 font-inter  dark:text-white md:max-w-lg"
         >
           <input
             type="email"
@@ -64,6 +65,7 @@ export const LoginPage = () => {
             </button>
           )}
         </form>
+        <div className="dark:text-white font-inter center text-sm">Dont have an account? <Link to="/register" className="text-darkFont font-bold">Register!</Link></div>
       </div>
     </>
   );

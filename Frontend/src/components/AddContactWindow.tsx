@@ -13,6 +13,7 @@ import { Tooltip } from "react-tooltip";
 export const AddContactWindow = ({
   isAddWindowOpen,
   setIsAddWindowOpen,
+  handleAddContact
 }: AddContactWindowProps) => {
   const [contactData, setContactData] = useState({
     name: "",
@@ -51,7 +52,7 @@ export const AddContactWindow = ({
         </button>
 
         {/* Add form */}
-        <form onSubmit={() => console.log(contactData)}>
+        <form onSubmit={(e) => handleAddContact(e,contactData)}>
           {/* name */}
           <div className="mt-5 flex items-end  gap-5">
             <FontAwesomeIcon className="text-xl text-gray-500" icon={faUser} />
@@ -104,12 +105,12 @@ export const AddContactWindow = ({
           <div className="mt-10 flex justify-center ">
             <button
               type="submit"
-              className="mx-auto p-3 text-2xl text-white active:text-slate-500"
+              className="mx-auto p-3 text-white active:text-slate-500"
               data-tooltip-id="add-tooltip"
               data-tooltip-content="Add Contact"
             >
-              <FontAwesomeIcon icon={faPlus} />
-              <span className="pl-3">Add</span>
+              <FontAwesomeIcon icon={faPlus} className="text-xl" />
+              <span className="pl-3 text-xl">Add</span>
               <Tooltip id="add-tooltip" />
             </button>
           </div>
