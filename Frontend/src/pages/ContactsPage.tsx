@@ -4,29 +4,37 @@ import {
   faArrowRightFromBracket,
   faPhone,
   faPenToSquare,
+  faUserPlus,
 } from "@fortawesome/free-solid-svg-icons";
 import api from "../services/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Contact } from "../../types/types";
+import { BaseContact, Contact } from "../../types/types";
 import { Tooltip } from "react-tooltip";
 import { ContactWindow } from "../components/ContactWindow";
-import { ChangeEvent, Dispatch, MouseEvent, SetStateAction, useState } from "react";
+import {
+  ChangeEvent,
+  Dispatch,
+  MouseEvent,
+  SetStateAction,
+  useState,
+} from "react";
 import { LoadingComponent } from "../components/LoadingComponent";
+import { AddContactWindow } from "../components/AddContactWindow";
 
 export const ContactsPage = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isEditDisabled, setIsEditDisabled] = useState(true);
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const { cookies, Logout } = useAuth();
-  const queryClient = useQueryClient();
- 
-  const updateContact = async (contactData:Contact) => {
-    const url = `/api/contacts/${contactData._id}`
+  const [isAddWindowOpen, setIsAddWindowOpen] = useState(false);
+
+  const updateContact = async (contactData: Contact) => {
+    const url = `/api/contacts/${contactData._id}`;
     const body = {
       name: contactData.name,
       email: contactData.email,
-      phone: contactData.phone
-    }
+      phone: contactData.phone,
+    };
     return api.put(url, body, {
       headers: {
         Authorization: `Bearer ${cookies.token}`,
@@ -35,11 +43,20 @@ export const ContactsPage = () => {
   };
 
 
+  const addContact = async(contactData: BaseContact) =>{
 
-  const { mutateAsync, isLoading:isEditLoading, isError:isEditError } = useMutation({
-    mutationFn:updateContact
+  }
+
+
+  // Editing mutation hook
+  const {
+    mutateAsync,
+    isLoading: isEditLoading,
+    isError: isEditError,
+  } = useMutation({
+    mutationFn: updateContact,
   });
-  
+
   const windowOpen = (contact: Contact) => {
     setSelectedContact(contact);
     setIsOpen((prevState) => !prevState);
@@ -58,14 +75,18 @@ export const ContactsPage = () => {
     });
   };
 
-  
-
-  const handleUpdateContact = (event:MouseEvent<HTMLButtonElement, MouseEvent>,contactData:Contact) =>{
+  const handleUpdateContact = (
+    event: MouseEvent<HTMLButtonElement, MouseEvent>,
+    contactData: Contact
+  ) => {
     event.preventDefault();
-    mutateAsync(contactData)
-    .then(()=>{
+    mutateAsync(contactData).then(() => {
       refetch();
-    })
+    });
+  };
+
+  const handleAddContact = (event: MouseEvent<HTMLButtonElement, MouseEvent>,contactData: BaseContact)=>{
+
   }
 
   const fetchAllContacts = async () => {
@@ -88,9 +109,10 @@ export const ContactsPage = () => {
 
   const Header = () => {
     return (
-      <div className="flex justify-between border-b border-gray-500 px-3 py-6">
+      <div className="flex justify-between px-3 py-6">
         <div className="text-4xl font-light text-white">Contacts</div>
         <button className="text-2xl text-white" onClick={Logout}>
+          <span></span>
           <FontAwesomeIcon
             icon={faArrowRightFromBracket}
             className="text-white hover:opacity-10"
@@ -125,7 +147,6 @@ export const ContactsPage = () => {
               <div
                 className="flex cursor-pointer items-center justify-between border-b border-gray-600 p-6"
                 onClick={() => windowOpen(contact)}
-                
               >
                 <div className="flex">
                   {/* Profile */}
@@ -136,7 +157,13 @@ export const ContactsPage = () => {
                     </span>
                   </div>
                   {/* Contact Name */}
-                  {(isEditLoading || isRefetching) ? <div className="ml-5 -mt-[0.45rem]"><LoadingComponent/></div> : <div className="p-4 text-xl text-white">{contact.name}</div>}
+                  {isEditLoading || isRefetching ? (
+                    <div className="-mt-[0.45rem] ml-5">
+                      <LoadingComponent />
+                    </div>
+                  ) : (
+                    <div className="p-4 text-xl text-white">{contact.name}</div>
+                  )}
                 </div>
                 <div>
                   <button
@@ -167,7 +194,7 @@ export const ContactsPage = () => {
                   </button>
                 </div>
               </div>
-            </div >
+            </div>
           );
         })}
       </>
@@ -178,7 +205,14 @@ export const ContactsPage = () => {
     <>
       <div className="mx-auto h-screen max-w-4xl border border-gray-700">
         <Header />
+        <div className="px-11 py-6 text-2xl text-slate-300 active:text-slate-600">
+          <button onClick={() => setIsAddWindowOpen(prevState => !prevState)}>
+            <FontAwesomeIcon icon={faUserPlus} />
+          </button>
+        </div>
         <ContactList data={data?.data} />
+
+        {/* Contact Window */}
         {isOpen && selectedContact && (
           <ContactWindow
             isOpen={isOpen}
@@ -189,6 +223,16 @@ export const ContactsPage = () => {
             handleContactChange={handleContactChange}
             handleUpdateContact={handleUpdateContact}
           />
+        )}
+
+        {/* Add Contact Window */}
+
+        {isAddWindowOpen && (
+          <AddContactWindow 
+          isAddWindowOpen={isAddWindowOpen} 
+          setIsAddWindowOpen={setIsAddWindowOpen}
+          handleAddContact={handleAddContact}
+        />
         )}
       </div>
     </>

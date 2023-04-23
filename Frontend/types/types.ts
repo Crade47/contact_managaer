@@ -17,12 +17,15 @@ export interface UserContextValue {
     isLoading: boolean,
   };
 
-export interface Contact{
-
-  createdAt:Date,
+export interface BaseContact{
   email:string,
   name: string,
   phone: string
+}
+
+export interface Contact extends BaseContact{
+
+  createdAt:Date,
   updatedAt:Date,
   user_id:string,
   _id: string
@@ -36,4 +39,10 @@ export interface ContactWindowProps{
   setIsEditDisabled:Dispatch<SetStateAction<boolean>>,
   handleContactChange: (event: ChangeEvent<HTMLInputElement>, setContactData: Dispatch<SetStateAction<Contact>>) => void,
   handleUpdateContact: (event: MouseEvent<HTMLButtonElement, MouseEvent>,contactData:Contact) => void
+}
+
+export interface AddContactWindowProps{
+  isAddWindowOpen: boolean,
+  setIsAddWindowOpen:Dispatch<SetStateAction<boolean>>,
+  handleAddContact: (event: MouseEvent<HTMLButtonElement, MouseEvent>,contactData: BaseContact) => void;
 }
