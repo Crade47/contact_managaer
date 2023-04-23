@@ -15,6 +15,8 @@ export interface UserContextValue {
     handleFormChange: (event: ChangeEvent<HTMLInputElement>, setFormData: React.Dispatch<React.SetStateAction<UserData>>) => void,
     errorState: string | null,
     isLoading: boolean,
+    handleRegisterSubmit: (event: FormEvent, formData: UserData) => void,
+    registerError: string | null
   };
 
 export interface BaseContact{

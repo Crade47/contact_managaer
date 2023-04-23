@@ -4,7 +4,7 @@ import { useAuth } from "../hooks/auth";
 import { UserData } from "../../types/types";
 import { Link } from "react-router-dom";
 export const RegisterPage = () => {
-  const { handleFormChange } = useAuth();
+  const { handleFormChange, handleRegisterSubmit, registerError } = useAuth();
 
   const [formData, setFormData] = useState<UserData>({
     username: "",
@@ -12,9 +12,9 @@ export const RegisterPage = () => {
     password: "",
   });
 
-  const handleSubmit = (event: FormEvent) => {
-    event.preventDefault();
-  };
+  
+
+  
 
   return (
     <>
@@ -24,7 +24,7 @@ export const RegisterPage = () => {
         </div>
 
         <form
-          onSubmit={handleSubmit}
+          onSubmit={(e) => handleRegisterSubmit(e, formData)}
           className="mx-auto flex max-w-xs flex-col justify-center gap-y-4 rounded-lg p-9 font-inter shadow-md backdrop-blur-3xl dark:text-white md:max-w-lg"
         >
           <input
@@ -54,7 +54,10 @@ export const RegisterPage = () => {
             placeholder="Password"
             required
           />
-
+          <div className="text-red-600">
+            {registerError ? <div>{registerError}</div> : <div></div>
+            }
+          </div>
           <button
             type="submit"
             className="mt-4 border px-4 py-2 font-inter text-xl font-light hover:bg-slate-100  active:bg-slate-600 dark:text-white dark:hover:text-gray-700 "

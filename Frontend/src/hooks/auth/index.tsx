@@ -1,10 +1,11 @@
-import { ChangeEvent, createContext, useContext, useMemo, useState } from 'react';
+import { ChangeEvent, FormEvent, createContext, useContext, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useCookies } from 'react-cookie';
 import { UserContextValue, UserData } from '../../../types/types';
 import api from '../../services/api';
 import { useNavigate } from 'react-router-dom';
 import type { AxiosError } from 'axios';
+import { useMutation } from '@tanstack/react-query';
 
 
 
@@ -15,6 +16,7 @@ export const UserProvider = ({children}:{children:ReactNode}) =>{
     const [ cookies, setCookies, removeCookies ] = useCookies();
     const [errorState, setErrorState] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [registerError, setRegisterError] = useState<string|null>(null)
     const navigate = useNavigate();
     const Login = async (data:UserData) => {
         try {
@@ -51,6 +53,26 @@ export const UserProvider = ({children}:{children:ReactNode}) =>{
         ['token'].forEach(obj => removeCookies(obj));
     }
 
+    const Register = (userData:UserData) =>{
+        return api.post("/api/users/register", userData);
+    }
+
+    const { mutateAsync:RegisterUser } = useMutation({
+        mutationFn:Register
+    });
+
+    const handleRegisterSubmit = (event: FormEvent, formData:UserData) => {
+        
+        event.preventDefault();
+        RegisterUser(formData).then(()=>{
+            navigate("/login")
+
+        }).catch((error)=>{
+            setRegisterError(error.message);
+        })
+        
+    };
+
     const value:UserContextValue = useMemo(
         ()=>({
             cookies:{token: cookies.token},
@@ -59,6 +81,8 @@ export const UserProvider = ({children}:{children:ReactNode}) =>{
             handleFormChange,
             errorState,
             isLoading,
+            handleRegisterSubmit,
+            registerError
         }),
         [cookies,errorState,isLoading]
     )
